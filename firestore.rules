@@ -1,0 +1,151 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ============================================
+    // OPEN ACCESS RULES
+    // Designed to work seamlessly with both:
+    // - Mobile App (authenticated and unauthenticated users)
+    // - Admin Dashboard (authenticated admins)
+    // ============================================
+    
+    // ============================================
+    // ADMINS COLLECTION (Admin Panel Users)
+    // ============================================
+    match /admins/{adminId} {
+      // Full open access for admin operations
+      allow read, write: if true;
+    }
+    
+    // ============================================
+    // USERS COLLECTION (Mobile App Users)
+    // ============================================
+    match /users/{userId} {
+      // Full open access for user management
+      // Supports: registration, profile updates, admin approval
+      allow read, write: if true;
+    }
+    
+    // ============================================
+    // REPORTS COLLECTION (User Reports & Complaints)
+    // ============================================
+    match /reports/{reportId} {
+      // Full open access for reports
+      // Supports: mobile app submissions, admin moderation
+      allow read, write: if true;
+    }
+    
+    // ============================================
+    // ANNOUNCEMENTS COLLECTION
+    // ============================================
+    match /announcements/{announcementId} {
+      // Full open access for announcements
+      // Supports: admin creation, mobile app viewing
+      allow read, write: if true;
+    }
+    
+    // ============================================
+    // FEEDBACK COLLECTION
+    // ============================================
+    match /feedback/{feedbackId} {
+      // Full open access for feedback
+      // Supports: mobile app submissions, admin viewing/response
+      allow read, write: if true;
+    }
+    
+    // ============================================
+    // SERVICE REQUESTS COLLECTION
+    // ============================================
+    match /service_requests/{requestId} {
+      // Full open access for service requests
+      // Supports: mobile app submissions, admin processing
+      allow read, write: if true;
+    }
+    
+    // ============================================
+    // LOST & FOUND ITEMS COLLECTIONS
+    // ============================================
+    match /lost_items/{itemId} {
+      // Full open access for lost items
+      // Supports: mobile app reporting, admin management
+      allow read, write: if true;
+    }
+    
+    match /found_items/{itemId} {
+      // Full open access for found items
+      // Supports: mobile app reporting, admin management
+      allow read, write: if true;
+    }
+    
+    // ============================================
+    // SUPPLIES COLLECTION (Barangay Supplies)
+    // ============================================
+    match /supplies/{supplyId} {
+      // Full open access for supplies inventory
+      // Supports: mobile app viewing, admin inventory management
+      allow read, write: if true;
+    }
+    
+    // ============================================
+    // BORROWED SUPPLIES COLLECTION
+    // ============================================
+    match /borrowed_supplies/{borrowId} {
+      // Full open access for borrowed supplies
+      // Supports: mobile app borrow requests, admin approval/tracking
+      allow read, write: if true;
+    }
+    
+    // ============================================
+    // BARANGAY OFFICIALS COLLECTION
+    // ============================================
+    match /barangay_officials/{officialId} {
+      // Full open access for barangay officials
+      // Supports: mobile app viewing, admin management
+      allow read, write: if true;
+    }
+    
+    // ============================================
+    // BARANGAY FACILITIES COLLECTION
+    // ============================================
+    match /barangay_facilities/{facilityId} {
+      // Full open access for barangay facilities
+      // Supports: mobile app viewing, admin management
+      allow read, write: if true;
+    }
+    
+    // ============================================
+    // COMMUNITY NEWS COLLECTION
+    // ============================================
+    match /community_news/{newsId} {
+      // Full open access for community news
+      // Supports: mobile app viewing, admin publishing
+      allow read, write: if true;
+    }
+    
+    // ============================================
+    // NOTIFICATIONS COLLECTION
+    // ============================================
+    match /notifications/{notificationId} {
+      // Full open access for notifications
+      // Supports: system-generated, user management, admin cleanup
+      allow read, write: if true;
+    }
+    
+    // ============================================
+    // USER NOTIFICATIONS SUBCOLLECTION
+    // ============================================
+    match /users/{userId}/notifications/{notificationId} {
+      // Full open access for user notifications
+      // Supports: notification delivery, user read/delete
+      allow read, write: if true;
+    }
+    
+    // ============================================
+    // CONNECTION TEST COLLECTION (Diagnostics)
+    // ============================================
+    match /_connection_test/{testDoc} {
+      // Full access for testing connection
+      allow read, write: if true;
+    }
+  }
+}
