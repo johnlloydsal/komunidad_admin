@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, FileText, Megaphone, Package, Users, MessageSquare, LogOut, Box, ClipboardList, Info, Database, UserPlus, ChevronRight, Shield } from 'lucide-react';
+import { LayoutDashboard, FileText, Megaphone, Package, Users, MessageSquare, LogOut, Box, ClipboardList, Info, Database, UserPlus, ChevronRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useState } from 'react';
 
@@ -9,7 +9,6 @@ const Sidebar = ({ onLogout }) => {
 
   const menuItems = [
     { path: '/', icon: LayoutDashboard, label: 'Dashboard', color: 'from-blue-500 to-indigo-600' },
-    { path: '/manage-admins', icon: Shield, label: 'Manage Admin Approvals', color: 'from-red-500 to-pink-600' },
     { path: '/reports', icon: FileText, label: 'View Reports', color: 'from-green-500 to-emerald-600' },
     { path: '/announcements', icon: Megaphone, label: 'View Announcements', color: 'from-purple-500 to-pink-600' },
     { path: '/barangay-info', icon: Info, label: 'Barangay Information', color: 'from-cyan-500 to-blue-600' },
