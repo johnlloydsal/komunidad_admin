@@ -22,6 +22,7 @@ import ManageSupplies from './pages/ManageSupplies';
 import ViewBorrowedSupplies from './pages/ViewBorrowedSupplies';
 import ManageUsers from './pages/ManageUsers';
 import ViewFeedback from './pages/ViewFeedback';
+import PendingApproval from './pages/PendingApproval';
 import Profile from './pages/Profile';
 import Settings from './pages/Settings';
 import ConnectFirebase from './pages/ConnectFirebase';
@@ -56,6 +57,10 @@ function AppContent() {
         <Route 
           path="/email-verification" 
           element={user ? <EmailVerification /> : <Navigate to="/login" replace />} 
+        />
+        <Route
+          path="/pending-approval"
+          element={user ? <PendingApproval /> : <Navigate to="/login" replace />}
         />
         
         <Route

@@ -32,8 +32,8 @@ const Login = () => {
       // Check if admin is approved
       const adminDoc = await getDoc(doc(db, 'admins', user.uid));
       if (!adminDoc.exists() || adminDoc.data().approvalStatus !== 'approved') {
-        setError('Your admin account is pending approval. Please wait for super admin approval.');
-        await auth.signOut();
+        // Redirect to pending approval page
+        navigate('/pending-approval');
         setLoading(false);
         return;
       }
@@ -91,8 +91,8 @@ const Login = () => {
       // Check if admin is approved
       const updatedAdminDoc = await getDoc(doc(db, 'admins', user.uid));
       if (updatedAdminDoc.data().approvalStatus !== 'approved') {
-        setError('Your admin account is pending approval. Please wait for super admin approval.');
-        await auth.signOut();
+        // Redirect to pending approval page
+        navigate('/pending-approval');
         setLoading(false);
         return;
       }

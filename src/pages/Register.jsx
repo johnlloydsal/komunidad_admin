@@ -65,8 +65,8 @@ const Register = () => {
       // Send verification email
       await sendEmailVerification(userCredential.user);
       
-      // Redirect to verification page
-      navigate('/email-verification');
+      // Redirect to pending approval page
+      navigate('/pending-approval');
     } catch (err) {
       if (err.code === 'auth/email-already-in-use') {
         setError('Email already in use');
