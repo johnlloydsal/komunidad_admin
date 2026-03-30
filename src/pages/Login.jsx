@@ -28,8 +28,17 @@ const Login = () => {
         setLoading(false);
         return;
       }
+
+      // Check if admin is approved
+      const adminDoc = await getDoc(doc(db, 'admins', user.uid));
+      if (!adminDoc.exists() || adminDoc.data().approvalStatus !== 'approved') {
+        setError('Your admin account is pending approval. Please wait for super admin approval.');
+        await auth.signOut();
+        setLoading(false);
+        return;
+      }
       
-      // Email verified, proceed to dashboard
+      // Email verified and approved, proceed to dashboard
       navigate('/');
     } catch (err) {
       if (err.code === 'auth/wrong-password' || err.code === 'auth/user-not-found') {
@@ -65,7 +74,7 @@ const Login = () => {
       const isNewUser = !adminDoc.exists();
       
       if (isNewUser) {
-        // Create admin document for new Google sign-in users
+        // Create admin document for new Google sign-in users with pending approval
         await setDoc(doc(db, 'admins', user.uid), {
           displayName: user.displayName || user.email.split('@')[0],
           email: user.email,
@@ -73,9 +82,19 @@ const Login = () => {
           role: 'admin',
           provider: 'google',
           emailVerified: user.emailVerified,
+          approvalStatus: 'pending', // New admins start as pending
           createdAt: serverTimestamp()
         });
-        console.log('✅ New admin account created');
+        console.log('✅ New admin account created (pending approval)');
+      }
+
+      // Check if admin is approved
+      const updatedAdminDoc = await getDoc(doc(db, 'admins', user.uid));
+      if (updatedAdminDoc.data().approvalStatus !== 'approved') {
+        setError('Your admin account is pending approval. Please wait for super admin approval.');
+        await auth.signOut();
+        setLoading(false);
+        return;
       }
 
       // STEP 2: Send welcome email to Google users

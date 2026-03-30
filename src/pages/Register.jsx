@@ -52,11 +52,13 @@ const Register = () => {
         displayName: formData.displayName
       });
 
-      // Save admin user info to Firestore
+      // Save admin user info to Firestore with pending approval status
       await setDoc(doc(db, 'admins', userCredential.user.uid), {
         displayName: formData.displayName,
         email: formData.email,
         role: 'admin',
+        provider: 'email',
+        approvalStatus: 'pending', // New admins start as pending
         createdAt: serverTimestamp()
       });
 

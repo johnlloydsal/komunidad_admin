@@ -21,6 +21,7 @@ import ManageLostFound from './pages/ManageLostFound';
 import ManageSupplies from './pages/ManageSupplies';
 import ViewBorrowedSupplies from './pages/ViewBorrowedSupplies';
 import ManageUsers from './pages/ManageUsers';
+import ManageAdmins from './pages/ManageAdmins';
 import ViewFeedback from './pages/ViewFeedback';
 import Profile from './pages/Profile';
 import Settings from './pages/Settings';
@@ -67,6 +68,7 @@ function AppContent() {
           }
         >
           <Route index element={<Dashboard />} />
+          <Route path="manage-admins" element={<ManageAdmins />} />
           <Route path="reports" element={<ViewReports />} />
           <Route path="announcements" element={<ViewAnnouncements />} />
           <Route path="barangay-info" element={<ManageBarangayInfo />} />
