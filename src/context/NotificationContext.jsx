@@ -102,6 +102,15 @@ export const NotificationProvider = ({ children }) => {
     });
   };
 
+  const removeNotifications = (predicate) => {
+    setNotifications(prev => {
+      const filtered = prev.filter(n => !predicate(n));
+      if (filtered.length === prev.length) return prev;
+      setUnreadCount(filtered.filter(n => !n.read).length);
+      return filtered;
+    });
+  };
+
   // Listen to reports
   useEffect(() => {
     if (!user) return;
@@ -386,6 +395,14 @@ export const NotificationProvider = ({ children }) => {
       const unsub = onSnapshot(q, (snapshot) => {
         const items = [];
 
+        const shouldKeepUserNotification = (userData) => {
+          const approvalStatus = userData?.approvalStatus;
+          const accountStatus = userData?.accountStatus;
+          const isPending = approvalStatus === 'pending' || userData?.isPending === true || accountStatus === 'pending';
+          const isInactive = accountStatus === 'inactive' || accountStatus === 'disabled' || accountStatus === 'deactivated';
+          return isPending && !isInactive;
+        };
+
         snapshot.docChanges().forEach(change => {
           const data = change.doc.data();
           const docId = change.doc.id;
@@ -432,6 +449,11 @@ export const NotificationProvider = ({ children }) => {
           if (change.type === 'modified') {
             const idUrl = getIdUrl(data);
 
+            // Remove pending-registration notification when account is no longer pending/active.
+            if (!shouldKeepUserNotification(data)) {
+              removeNotifications(n => n.type === 'user' && !n.subType && n.userId === docId);
+            }
+
             if (idUrl && !usersWithIdsRef.current.has(docId)) {
               // First time this user has an ID — fire notification
               usersWithIdsRef.current.add(docId);
@@ -456,6 +478,17 @@ export const NotificationProvider = ({ children }) => {
               });
               console.log('✅ ID submission detected for:', userName, '| userId:', docId);
             }
+
+            // If ID is removed or account is inactive, remove ID-submitted notification.
+            if (!idUrl || !shouldKeepUserNotification(data)) {
+              removeNotifications(n => n.type === 'user' && n.subType === 'id_submitted' && n.userId === docId);
+            }
+          }
+
+          // If user document is deleted, remove all user-related notifications for that user.
+          if (change.type === 'removed') {
+            usersWithIdsRef.current.delete(docId);
+            removeNotifications(n => n.type === 'user' && n.userId === docId);
           }
         });
 
