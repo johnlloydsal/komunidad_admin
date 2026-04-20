@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Bell, Moon, Globe, Lock, Shield, Eye, Database, Smartphone, Users, FileText, Package, MapPin, Settings as SettingsIcon } from 'lucide-react';
-import { db } from '../firebase';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { useNavigate } from 'react-router-dom';
+import { Bell, Shield, Eye, Database, Smartphone, Users, FileText, Package, MapPin, Settings as SettingsIcon } from 'lucide-react';
+import { auth, db } from '../firebase';
+import { deleteUser, signOut } from 'firebase/auth';
+import { doc, getDoc, setDoc, deleteDoc } from 'firebase/firestore';
 
 const Settings = () => {
   const [settings, setSettings] = useState({
@@ -38,6 +40,10 @@ const Settings = () => {
   });
 
   const [saving, setSaving] = useState(false);
+  const [clearing, setClearing] = useState(false);
+  const [exporting, setExporting] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const loadSettings = async () => {
@@ -53,6 +59,13 @@ const Settings = () => {
     };
     loadSettings();
   }, []);
+
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+    document.documentElement.dataset.theme = settings.appearance.darkMode ? 'dark' : 'light';
+    document.body.classList.toggle('compact-view', settings.appearance.compactView);
+    document.documentElement.lang = settings.appearance.language || 'en';
+  }, [settings.appearance]);
 
   const handleToggle = (category, key) => {
     setSettings(prev => ({
@@ -75,6 +88,72 @@ const Settings = () => {
       alert('Error saving settings. Please try again.');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleClearCache = async () => {
+    if (!window.confirm('Clear browser cache and local settings?')) return;
+    setClearing(true);
+    try {
+      window.localStorage.clear();
+      window.sessionStorage.clear();
+      if ('caches' in window) {
+        const cacheKeys = await caches.keys();
+        await Promise.all(cacheKeys.map((key) => caches.delete(key)));
+      }
+      alert('Cache cleared successfully. Reloading page...');
+      window.location.reload();
+    } catch (error) {
+      console.error('Error clearing cache:', error);
+      alert('Unable to clear cache. Please try again.');
+    } finally {
+      setClearing(false);
+    }
+  };
+
+  const handleExportData = () => {
+    setExporting(true);
+    try {
+      const json = JSON.stringify(settings, null, 2);
+      const blob = new Blob([json], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `komunidad-admin-settings-${new Date().toISOString().slice(0, 10)}.json`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error exporting settings:', error);
+      alert('Unable to export settings.');
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (!window.confirm('Delete your account and remove admin data? This cannot be undone.')) return;
+    setDeleting(true);
+    try {
+      const currentUser = auth.currentUser;
+      if (!currentUser) {
+        throw new Error('No logged-in user found.');
+      }
+      await deleteDoc(doc(db, 'admins', currentUser.uid));
+      await deleteUser(currentUser);
+      await signOut(auth);
+      alert('Your account has been deleted.');
+      navigate('/login');
+    } catch (error) {
+      console.error('Error deleting account:', error);
+      if (error.code === 'auth/requires-recent-login') {
+        alert('To delete your account, please sign in again and try again.');
+      } else {
+        alert('Unable to delete account. Please try again later.');
+      }
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -520,17 +599,29 @@ const Settings = () => {
           </div>
           
           <div className="space-y-3">
-            <button className="w-full text-left px-4 py-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition">
+            <button
+              onClick={handleClearCache}
+              disabled={clearing || saving || exporting || deleting}
+              className="w-full text-left px-4 py-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition disabled:opacity-50"
+            >
               <p className="font-medium text-gray-800">Clear Cache</p>
               <p className="text-sm text-gray-600">Remove temporary files and data</p>
             </button>
-            <button className="w-full text-left px-4 py-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition">
+            <button
+              onClick={handleExportData}
+              disabled={exporting || saving || clearing || deleting}
+              className="w-full text-left px-4 py-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition disabled:opacity-50"
+            >
               <p className="font-medium text-gray-800">Export Data</p>
-              <p className="text-sm text-gray-600">Download a copy of your data</p>
+              <p className="text-sm text-gray-600">Download a copy of your settings</p>
             </button>
-            <button className="w-full text-left px-4 py-3 bg-red-50 hover:bg-red-100 rounded-lg transition text-red-600">
+            <button
+              onClick={handleDeleteAccount}
+              disabled={deleting || saving || clearing || exporting}
+              className="w-full text-left px-4 py-3 bg-red-50 hover:bg-red-100 rounded-lg transition text-red-600 disabled:opacity-50"
+            >
               <p className="font-medium">Delete Account</p>
-              <p className="text-sm">Permanently delete your account and all data</p>
+              <p className="text-sm">Permanently delete your admin account and data</p>
             </button>
           </div>
         </div>
