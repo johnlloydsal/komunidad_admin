@@ -147,5 +147,14 @@ service cloud.firestore {
       // Full access for testing connection
       allow read, write: if true;
     }
+
+    // ============================================
+    // SETTINGS COLLECTION (Admin Configuration)
+    // ============================================
+    match /settings/{settingId} {
+      // Full access for admin settings
+      // Supports: admin dashboard configuration
+      allow read, write: if true;
+    }
   }
 }
